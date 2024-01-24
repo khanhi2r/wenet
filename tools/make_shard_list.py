@@ -18,6 +18,7 @@ import argparse
 import io
 import logging
 import os
+import sys
 import tarfile
 import time
 import multiprocessing
@@ -48,7 +49,7 @@ def write_tar_file(data_list,
                 key, txt, wav, start, end = item
 
             suffix = wav.split('.')[-1]
-            assert suffix in AUDIO_FORMAT_SETS
+            assert suffix.lower() in AUDIO_FORMAT_SETS, f"suffix {suffix} is not in audio format set {AUDIO_FOMRAT_SETS}"
             if no_segments:
                 ts = time.time()
                 with open(wav, 'rb') as fin:
@@ -136,7 +137,9 @@ if __name__ == '__main__':
     with open(args.wav_file, 'r', encoding='utf8') as fin:
         for line in fin:
             arr = line.strip().split()
-            assert len(arr) == 2
+            if len(arr) != 2:
+                print(f"WARNING: wav.scp line format error: {line}", file=sys.stderr)
+                continue
             wav_table[arr[0]] = arr[1]
 
     no_segments = True
@@ -160,6 +163,9 @@ if __name__ == '__main__':
                 wav = wav_table[key]
                 data.append((key, txt, wav))
             else:
+                if key not in segments_table:
+                    print(f"WARNING: key does not have segment: {key}", file=sys.stderr)
+                    continue
                 wav_key, start, end = segments_table[key]
                 wav = wav_table[wav_key]
                 data.append((key, txt, wav, start, end))
@@ -168,21 +174,32 @@ if __name__ == '__main__':
     chunks = [data[i:i + num] for i in range(0, len(data), num)]
     os.makedirs(args.shards_dir, exist_ok=True)
 
-    # Using thread pool to speedup
-    pool = multiprocessing.Pool(processes=args.num_threads)
-    shards_list = []
-    tasks_list = []
-    num_chunks = len(chunks)
-    for i, chunk in enumerate(chunks):
-        tar_file = os.path.join(args.shards_dir,
-                                '{}_{:09d}.tar'.format(args.prefix, i))
-        shards_list.append(tar_file)
-        pool.apply_async(
-            write_tar_file,
-            (chunk, no_segments, tar_file, args.resample, i, num_chunks))
+    # Using thread pool to speedup if not DEBUG
+    DEBUG = False
+    if not DEBUG:
+        pool = multiprocessing.Pool(processes=args.num_threads)
+        shards_list = []
+        tasks_list = []
+        num_chunks = len(chunks)
+        for i, chunk in enumerate(chunks):
+            tar_file = os.path.join(args.shards_dir,
+                                    '{}_{:09d}.tar'.format(args.prefix, i))
+            shards_list.append(tar_file)
+            pool.apply_async(
+                write_tar_file,
+                (chunk, no_segments, tar_file, args.resample, i, num_chunks))
 
-    pool.close()
-    pool.join()
+        pool.close()
+        pool.join()
+    else:
+        shards_list = []
+        tasks_list = []
+        num_chunks = len(chunks)
+        for i, chunk in enumerate(chunks):
+            tar_file = os.path.join(args.shards_dir,
+                                    '{}_{:09d}.tar'.format(args.prefix, i))
+            shards_list.append(tar_file)
+            write_tar_file(chunk, no_segments, tar_file, args.resample, i, num_chunks)
 
     with open(args.shards_list, 'w', encoding='utf8') as fout:
         for name in shards_list:

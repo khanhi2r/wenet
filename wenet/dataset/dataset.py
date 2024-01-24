@@ -154,7 +154,8 @@ def Dataset(data_type,
 
     speed_perturb = conf.get('speed_perturb', False)
     if speed_perturb:
-        dataset = Processor(dataset, processor.speed_perturb)
+        speed_perturb_conf = conf.get('speed_perturb_conf', {})
+        dataset = Processor(dataset, processor.speed_perturb, **speed_perturb_conf)
 
     feats_type = conf.get('feats_type', 'fbank')
     assert feats_type in ['fbank', 'mfcc']

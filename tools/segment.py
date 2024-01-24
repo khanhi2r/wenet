@@ -26,6 +26,9 @@ if __name__ == '__main__':
     with open(ori_wav, 'r') as ori:
         for l in ori:
             item = l.strip().split()
+            if len(item) != 2:
+                print(f"WARNING: wav.scp line format error: {l}", file=sys.stderr)
+                continue
             wav_dic[item[0]] = item[1]
     with open(wav_scp, 'w') as f, open(segment_file, 'r') as sgement:
         for l in sgement:
