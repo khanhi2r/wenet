@@ -100,7 +100,7 @@ def tar_file_and_group(data):
                         example[postfix] = file_obj.read()
                 except Exception as ex:
                     valid = False
-                    logging.warning('error to parse {}'.format(name))
+                    logging.warning('error to parse {}: {}'.format(name, ex))
             prev_prefix = prefix
         if prev_prefix is not None:
             example['key'] = prev_prefix
