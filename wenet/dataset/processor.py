@@ -224,23 +224,20 @@ def resample(data, resample_rate=16000):
         yield sample
 
 
-def speed_perturb(data, conf=None):
+def speed_perturb(data, speeds=None):
     """ Apply speed perturb to the data.
         Inplace operation.
 
         Args:
             data: Iterable[{key, wav, label, sample_rate}]
-            conf: speeds(List[float]): optional speed
+            speeds(List[float]): optional speed
 
         Returns:
             Iterable[{key, wav, label, sample_rate}]
     """
-    speeds = [0.9, 1.0, 1.1]
-    if conf is not None and "speeds" in conf:
-        speeds = conf["speeds"]
+    if speeds is None:
+        speeds = [0.9, 1.0, 1.1]
 
-    print(f"speed_perturb {speeds}")
-    
     for sample in data:
         assert 'sample_rate' in sample
         assert 'wav' in sample
