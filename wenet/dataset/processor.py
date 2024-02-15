@@ -185,8 +185,10 @@ def filter(data,
         # sample['wav'] is torch.Tensor, we have 100 frames every second
         num_frames = sample['wav'].size(1) / sample['sample_rate'] * 100
         if num_frames < min_length:
+            print("dropped 1 utterance due to short duration", file=sys.stderr)
             continue
         if num_frames > max_length:
+            print("dropped 1 utterance due to long duration", file=sys.stderr)
             continue
         if len(sample['label']) < token_min_length:
             continue
