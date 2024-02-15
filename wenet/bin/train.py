@@ -40,7 +40,7 @@ def get_args():
     parser.add_argument('--config', required=True, help='config file')
     parser.add_argument('--data_type',
                         default='raw',
-                        choices=['raw', 'shard'],
+                        choices=['raw', 'shard', 'custom'],
                         help='train and cv data type')
     parser.add_argument('--train_data', required=True, help='train data file')
     parser.add_argument('--cv_data', required=True, help='cv data file')
@@ -120,6 +120,10 @@ def get_args():
                         default='',
                         required=False,
                         help='LF-MMI dir')
+    parser.add_argument('--custom_data_parser',
+                        default='',
+                        required=False,
+                        help='custom_data_parser')
 
     args = parser.parse_args()
     return args
@@ -157,15 +161,27 @@ def main():
     cv_conf['shuffle'] = False
     non_lang_syms = read_non_lang_symbols(args.non_lang_syms)
 
+    # read data parser
+    custom_data_parser = None
+    if len(args.custom_data_parser) > 0:
+        path, name = args.custom_data_parser.split(":")
+        o = {}
+        exec(open(path).read(), o)
+        custom_data_parser = o[name]
+
     train_dataset = Dataset(args.data_type, args.train_data, symbol_table,
-                            train_conf, args.bpe_model, non_lang_syms, True)
+                            train_conf, args.bpe_model, non_lang_syms, True,
+                            custom_data_parser=custom_data_parser,
+                            )
     cv_dataset = Dataset(args.data_type,
                          args.cv_data,
                          symbol_table,
                          cv_conf,
                          args.bpe_model,
                          non_lang_syms,
-                         partition=False)
+                         partition=False,
+                         custom_data_parser=custom_data_parser,
+                         )
 
     train_data_loader = DataLoader(train_dataset,
                                    batch_size=None,

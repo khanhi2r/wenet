@@ -151,7 +151,6 @@ def parse_raw(data):
         except Exception as ex:
             logging.warning('Failed to read {}'.format(wav_file))
 
-
 def filter(data,
            max_length=10240,
            min_length=10,

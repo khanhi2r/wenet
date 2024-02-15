@@ -122,7 +122,9 @@ def Dataset(data_type,
             conf,
             bpe_model=None,
             non_lang_syms=None,
-            partition=True):
+            partition=True,
+            custom_data_parser=None,
+    ):
     """ Construct dataset from arguments
 
         We have two shuffle stage in the Dataset. The first is global
@@ -134,15 +136,20 @@ def Dataset(data_type,
             bpe_model(str): model for english bpe part
             partition(bool): whether to do data partition in terms of rank
     """
-    assert data_type in ['raw', 'shard']
+    assert data_type in ['raw', 'shard', 'custom']
     lists = read_lists(data_list_file)
     shuffle = conf.get('shuffle', True)
     dataset = DataList(lists, shuffle=shuffle, partition=partition)
     if data_type == 'shard':
         dataset = Processor(dataset, processor.url_opener)
         dataset = Processor(dataset, processor.tar_file_and_group)
-    else:
+    elif data_type == 'raw':
         dataset = Processor(dataset, processor.parse_raw)
+    elif data_type == 'custom':
+        dataset = Processor(dataset, custom_data_parser)
+    else:
+        raise RuntimeError(f"data_type not supported: {data_type}")
+        
 
     dataset = Processor(dataset, processor.tokenize, symbol_table, bpe_model,
                         non_lang_syms, conf.get('split_with_space', False))
