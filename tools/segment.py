@@ -26,10 +26,16 @@ if __name__ == '__main__':
     with open(ori_wav, 'r') as ori:
         for l in ori:
             item = l.strip().split()
+            if len(item) != 2:
+                print(f"WARNING: wav.scp line format error: {l}", file=sys.stderr)
+                continue
             wav_dic[item[0]] = item[1]
     with open(wav_scp, 'w') as f, open(segment_file, 'r') as sgement:
         for l in sgement:
             item = l.strip().split()
+            if len(item) != 4:
+                print(f"WARNING: segment line format error: {l}", file=sys.stderr)
+                continue
             if item[1] in wav_dic:
                 item[1] = wav_dic[item[1]]
                 f.write("{} {},{},{}\n".format(item[0], item[1], item[2],

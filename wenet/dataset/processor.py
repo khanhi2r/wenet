@@ -29,6 +29,8 @@ import torchaudio.compliance.kaldi as kaldi
 import torch.nn.functional as F
 from wenet.text.base_tokenizer import BaseTokenizer
 
+import sys
+
 torchaudio.utils.sox_utils.set_buffer_size(16500)
 
 AUDIO_FORMAT_SETS = set(['flac', 'mp3', 'm4a', 'ogg', 'opus', 'wav', 'wma'])
@@ -420,8 +422,10 @@ def filter(sample,
     # sample['wav'] is torch.Tensor, we have 100 frames every second
     num_frames = sample['wav'].size(1) / sample['sample_rate'] * 100
     if num_frames < min_length:
+        print(f'dropped {sample.get("key", "null")} utterance due to short duration {num_frames} ∉ [{min_length}, {max_length}]', file=sys.stderr)
         return False
     if num_frames > max_length:
+        print(f'dropped {sample.get("key", "null")} utterance due to long  duration {num_frames} ∉ [{min_length}, {max_length}]', file=sys.stderr)
         return False
 
     if 'label' in sample:
