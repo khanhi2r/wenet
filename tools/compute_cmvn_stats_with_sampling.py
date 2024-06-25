@@ -94,8 +94,8 @@ class AudioDataset(Dataset):
 
 
 if __name__ == '__main__':
-    import torch
-    torch.multiprocessing.set_sharing_strategy('file_system') # for many open files
+    # import torch
+    # torch.multiprocessing.set_sharing_strategy('file_system') # for many open files
 
     parser = argparse.ArgumentParser(description='extract CMVN stats')
     parser.add_argument('--num_workers',
