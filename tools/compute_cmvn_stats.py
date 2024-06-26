@@ -90,6 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('--out_cmvn',
                         default='global_cmvn',
                         help='global cmvn file')
+    
 
     doc = "Print log after every log_interval audios are processed."
     parser.add_argument("--log_interval", type=int, default=1000, help=doc)
@@ -105,7 +106,12 @@ if __name__ == '__main__':
         print('using resample and new sample rate is {}'.format(resample_rate))
 
     collate_func = CollateFunc(feat_dim, resample_rate)
-    dataset = AudioDataset(args.in_scp)
+    dataset = np.array(list(AudioDataset(args.in_scp)))
+    # use 10% only
+    import numpy as np
+    indices = np.random.choice(len(dataset), size=len(dataset)/10, replace=True)
+    dataset = dataset[indices]
+
     batch_size = 20
     data_loader = DataLoader(dataset,
                              batch_size=batch_size,
