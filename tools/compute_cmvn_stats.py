@@ -106,9 +106,10 @@ if __name__ == '__main__':
         print('using resample and new sample rate is {}'.format(resample_rate))
 
     collate_func = CollateFunc(feat_dim, resample_rate)
-    dataset = np.array(list(AudioDataset(args.in_scp)))
+    
     # use 10% only
     import numpy as np
+    dataset = np.array(list(AudioDataset(args.in_scp)))
     indices = np.random.choice(len(dataset), size=len(dataset)/10, replace=True)
     dataset = dataset[indices]
 
