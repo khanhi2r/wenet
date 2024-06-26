@@ -110,7 +110,7 @@ if __name__ == '__main__':
     # use 10% only
     import numpy as np
     dataset = np.array(list(AudioDataset(args.in_scp)))
-    indices = np.random.choice(len(dataset), size=len(dataset)/10, replace=True)
+    indices = np.random.choice(len(dataset), size=int(len(dataset)/10), replace=True)
     dataset = dataset[indices]
 
     batch_size = 20
