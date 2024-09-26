@@ -201,7 +201,7 @@ def resample(sample, resample_rate=16000):
             orig_freq=sample_rate, new_freq=resample_rate)(waveform)
     return sample
 
-def add_gaussian_noise(sample, snr: float=5):
+def add_gaussian_noise(sample, min_snr: float=0, max_snr: float=5):
     """
     add gaussian noise inplace
 
@@ -210,8 +210,8 @@ def add_gaussian_noise(sample, snr: float=5):
     waveform = sample['wav']
     device = waveform.device
     noise = torch.normal(mean=0, std=1, size=waveform.shape, device=device)
-    snr_arr = torch.Tensor([snr], device=device)
-    new_waveform = torchaudio.functional.add_noise(waveform=waveform, noise=noise, snr=snr_arr)
+    snr = min_snr + (max_snr - min_snr) * torch.rand(1, device=device)
+    new_waveform = torchaudio.functional.add_noise(waveform=waveform, noise=noise, snr=snr)
     sample['wav'] = new_waveform
     return sample
 
