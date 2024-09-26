@@ -201,6 +201,19 @@ def resample(sample, resample_rate=16000):
             orig_freq=sample_rate, new_freq=resample_rate)(waveform)
     return sample
 
+def add_gaussian_noise(sample, snr: float=5):
+    """
+    add gaussian noise inplace
+
+    """
+    assert "wav" in sample
+    waveform = sample['wav']
+    device = waveform.device
+    noise = torch.normal(mean=0, std=1, size=waveform.shape, device=device)
+    snr_arr = torch.Tensor([snr], device=device)
+    new_waveform = torchaudio.functional.add_noise(waveform=waveform, noise=noise, snr=snr_arr)
+    sample['wav'] = new_waveform
+    return sample
 
 def speed_perturb(sample, speeds=None):
     """ Apply speed perturb to the sample.

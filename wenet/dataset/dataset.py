@@ -82,6 +82,9 @@ def Dataset(data_type,
     filter_conf = conf.get('filter_conf', {})
     dataset = dataset.filter(partial(processor.filter, **filter_conf))
 
+    add_noise_conf = conf.get("add_noise_conf", {})
+    dataset = dataset.map(partial(processor.add_gaussian_noise, **add_noise_conf))
+
     resample_conf = conf.get('resample_conf', {})
     dataset = dataset.map(partial(processor.resample, **resample_conf))
 
